@@ -1,0 +1,77 @@
+/* Custom CSS enhancements for MatchPulse AI */
+
+/* Hide scrollbar for clean horizontal ball strip */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Custom Scrollbar for Chat */
+#chatHistory::-webkit-scrollbar {
+    width: 4px;
+}
+#chatHistory::-webkit-scrollbar-track {
+    background: #0E131F;
+}
+#chatHistory::-webkit-scrollbar-thumb {
+    background: #24324D;
+    border-radius: 4px;
+}
+#chatHistory::-webkit-scrollbar-thumb:hover {
+    background: #3B82F6;
+}
+
+/* Ball pill styles */
+.ball-pill {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    user-select: none;
+}
+.ball-pill:hover {
+    transform: translateY(-2px);
+}
+.ball-pill.active {
+    ring: 2px solid white;
+    box-shadow: 0 0 12px rgba(255, 46, 85, 0.6);
+    transform: scale(1.15);
+    z-index: 10;
+}
+
+.pill-wicket {
+    background-color: #EF4444;
+    color: white;
+    font-weight: 800;
+}
+.pill-six {
+    background-color: #8B5CF6;
+    color: white;
+    font-weight: 800;
+}
+.pill-four {
+    background-color: #10B981;
+    color: white;
+    font-weight: 800;
+}
+.pill-dot {
+    background-color: #1E293B;
+    color: #94A3B8;
+}
+.pill-run {
+    background-color: #334155;
+    color: #F8FAFC;
+}
+
+/* Shimmer pulse animation for active analysis */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}

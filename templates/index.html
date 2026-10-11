@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatchPulse AI — Live Tactical & Fantasy Match Companion | Dream11</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        stadium: {
+                            900: '#070A10',
+                            800: '#0E131F',
+                            700: '#172033',
+                            600: '#24324D',
+                        },
+                        dream: {
+                            red: '#E11D48',
+                            crimson: '#FF2E55',
+                            darkred: '#9F1239',
+                            gold: '#F59E0B',
+                            turf: '#10B981',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js for Win Probability & Momentum -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-stadium-900 text-slate-100 min-h-screen font-sans selection:bg-dream-crimson selection:text-white antialiased">
+
+    <!-- Top Navigation Bar -->
+    <header class="border-b border-stadium-700/80 bg-stadium-800/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-dream-red to-dream-crimson flex items-center justify-center shadow-lg shadow-dream-red/20 font-bold text-xl">
+                    🏏
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold tracking-tight text-lg text-white">MatchPulse <span class="text-dream-crimson">AI</span></span>
+                        <span class="bg-dream-red/20 text-dream-crimson text-[10px] font-bold px-2 py-0.5 rounded-full border border-dream-red/30 tracking-wide uppercase">
+                            Dream11 FDE
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 hidden sm:block">Live Match Tactical Decrypter & Fantasy Leverage Copilot</p>
+                </div>
+            </div>
+
+            <!-- Middle Match Selector & Live Sync -->
+            <div class="flex items-center space-x-2">
+                <label for="matchSelect" class="text-xs text-slate-400 hidden md:block">Scenario / Live Match:</label>
+                <select id="matchSelect" class="bg-stadium-700 border border-stadium-600 text-xs sm:text-sm rounded-lg px-3 py-1.5 text-slate-200 focus:outline-none focus:border-dream-crimson max-w-[260px] sm:max-w-none">
+                    <option value="ind_vs_sa_t20wc2024">IND vs SA — T20 WC 2024 Final (36 balls)</option>
+                    <option value="rcb_vs_csk_ipl2024">RCB vs CSK — IPL 2024 Qualifier (24 balls)</option>
+                </select>
+                <button id="syncLiveBtn" title="Sync Live Matches from Real-World Cricket Feed" class="p-1.5 rounded-lg bg-stadium-700 hover:bg-stadium-600 text-slate-300 hover:text-white transition border border-stadium-600/50 flex items-center text-xs">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-400"></i>
+                </button>
+            </div>
+
+            <!-- Right Actions: Live Ingest, Sound, API Key, About -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button id="liveIngestModalBtn" title="Ingest Any Real Live Match Ball" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 border border-red-500/40 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition flex items-center space-x-1.5">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                    <i data-lucide="radio" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Ingest Live Ball</span>
+                </button>
+                <button id="soundToggleBtn" title="Toggle Stadium Audio Synthesizer" class="p-2 rounded-lg bg-stadium-700/60 hover:bg-stadium-700 text-slate-300 hover:text-white transition border border-stadium-600/50 flex items-center space-x-1.5 text-xs">
+                    <i data-lucide="volume-2" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline" id="soundLabel">Sound ON</span>
+                </button>
+                <button id="apiKeyModalBtn" title="Configure Gemini API" class="p-2 rounded-lg bg-stadium-700/60 hover:bg-stadium-700 text-slate-300 hover:text-white transition border border-stadium-600/50 flex items-center space-x-1.5 text-xs">
+                    <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
+                    <span class="hidden sm:inline">AI Settings</span>
+                </button>
+                <button id="aboutModalBtn" class="bg-gradient-to-r from-dream-red to-dream-crimson hover:brightness-110 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1.5">
+                    <i data-lucide="award" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Pitch &amp; Demo</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
+
+        <!-- Live Scoreboard Hero Card -->
+        <section class="bg-gradient-to-b from-stadium-800 to-stadium-800/90 border border-stadium-700 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
+            <!-- Background Stadium Ambience Glow -->
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-dream-red/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 space-y-4">
+                <!-- Top Match Info & Live Badge -->
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-stadium-700/60 pb-3">
+                    <div class="flex items-center space-x-3">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-dream-red text-white uppercase tracking-wider animate-pulse">
+                            <span class="w-2 h-2 rounded-full bg-white mr-1.5"></span> LIVE SIMULATION
+                        </span>
+                        <h1 id="matchTitle" class="text-sm sm:text-base font-bold text-white tracking-wide">IND vs SA — T20 World Cup 2024 Final</h1>
+                    </div>
+                    <div class="flex items-center space-x-4 text-xs text-slate-400 font-medium">
+                        <span id="matchVenue"><i data-lucide="map-pin" class="w-3.5 h-3.5 inline mr-1 text-slate-500"></i>Kensington Oval, Barbados</span>
+                        <span id="firstInningsText" class="hidden sm:inline text-slate-300">IND 176/7 (20.0 ov)</span>
+                    </div>
+                </div>
+
+                <!-- Scoreboard Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                    <!-- Big Score Display -->
+                    <div class="md:col-span-5 space-y-2">
+                        <div class="flex items-baseline space-x-3">
+                            <span id="scoreText" class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white font-mono">151/5</span>
+                            <span id="overText" class="text-xl sm:text-2xl font-bold text-slate-400 font-mono">(15.1 ov)</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                            <span id="equationBadge" class="bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-md">
+                                Need 26 off 29 balls
+                            </span>
+                            <span id="rrrBadge" class="bg-stadium-700 text-slate-300 px-2.5 py-1 rounded-md">
+                                RRR: 5.38
+                            </span>
+                            <span id="crrBadge" class="bg-stadium-700 text-slate-300 px-2.5 py-1 rounded-md">
+                                CRR: 9.96
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Batter / Bowler Quick Strip -->
+                    <div class="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-stadium-900/60 p-3.5 rounded-xl border border-stadium-700/60 text-xs">
+                        <!-- Current Batters -->
+                        <div class="space-y-1.5 border-b sm:border-b-0 sm:border-r border-stadium-700/50 pb-2 sm:pb-0 sm:pr-3">
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center">
+                                <i data-lucide="crosshair" class="w-3.5 h-3.5 mr-1 text-dream-crimson"></i> Batting
+                            </div>
+                            <div class="flex justify-between items-center text-slate-200">
+                                <span class="font-semibold flex items-center"><span class="text-dream-crimson mr-1">🏏</span> <span id="strikerName">H. Klaasen</span></span>
+                                <span class="font-mono text-slate-300" id="strikerStats">52 (27b)</span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-400">
+                                <span id="nonStrikerName">D. Miller</span>
+                                <span class="font-mono" id="nonStrikerStats">17 (14b)</span>
+                            </div>
+                        </div>
+
+                        <!-- Current Bowler -->
+                        <div class="space-y-1.5 sm:pl-2">
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center">
+                                <i data-lucide="shield" class="w-3.5 h-3.5 mr-1 text-blue-400"></i> Bowling
+                            </div>
+                            <div class="flex justify-between items-center text-slate-200">
+                                <span class="font-semibold flex items-center"><span class="text-blue-400 mr-1">⚡</span> <span id="bowlerName">Hardik Pandya</span></span>
+                                <span class="font-mono text-emerald-400 font-bold" id="bowlerFigures">1-0-4-1</span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-400">
+                                <span>Recent Delivery:</span>
+                                <span class="font-mono text-amber-400" id="lastDeliverySpeed">123.4 km/h</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Win Probability Ratio Bar -->
+                <div class="space-y-1.5 pt-1">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span id="bowlingTeamProbLabel" class="text-blue-400">IND: 58%</span>
+                        <span class="text-slate-400 text-[11px] uppercase tracking-wider font-semibold">Live Win Predictor</span>
+                        <span id="battingTeamProbLabel" class="text-amber-400">SA: 42%</span>
+                    </div>
+                    <div class="h-2.5 w-full bg-stadium-900 rounded-full overflow-hidden flex border border-stadium-700/80">
+                        <div id="probBarBowling" class="bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-500" style="width: 58%"></div>
+                        <div id="probBarBatting" class="bg-gradient-to-r from-amber-400 to-amber-600 transition-all duration-500" style="width: 42%"></div>
+                    </div>
+                </div>
+
+                <!-- Simulation Control Toolbar & Interactive Ball Strip -->
+                <div class="bg-stadium-900/90 rounded-xl p-3 border border-stadium-700/80 flex flex-col lg:flex-row items-center justify-between gap-3">
+                    <!-- Controls -->
+                    <div class="flex items-center space-x-2">
+                        <button id="btnPrevBall" class="p-2 rounded-lg bg-stadium-700 hover:bg-stadium-600 text-slate-200 transition" title="Previous Ball">
+                            <i data-lucide="skip-back" class="w-4 h-4"></i>
+                        </button>
+                        <button id="btnPlayPause" class="px-4 py-2 rounded-lg bg-dream-red hover:bg-dream-crimson text-white font-bold text-xs flex items-center space-x-1.5 transition shadow-lg shadow-dream-red/30">
+                            <i data-lucide="play" class="w-4 h-4" id="playIcon"></i>
+                            <span id="playBtnText">Live Auto-Play</span>
+                        </button>
+                        <button id="btnNextBall" class="p-2 rounded-lg bg-stadium-700 hover:bg-stadium-600 text-slate-200 transition" title="Next Ball">
+                            <i data-lucide="skip-forward" class="w-4 h-4"></i>
+                        </button>
+                        <button id="btnReset" class="p-2 rounded-lg bg-stadium-700/60 hover:bg-stadium-700 text-slate-400 hover:text-slate-200 transition" title="Reset Simulation">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        </button>
+
+                        <div class="border-l border-stadium-700 h-6 mx-1"></div>
+
+                        <!-- Speed Controls -->
+                        <div class="flex items-center bg-stadium-800 rounded-lg p-0.5 border border-stadium-700 text-xs">
+                            <button data-speed="2500" class="speed-btn px-2 py-1 rounded text-slate-400 hover:text-white">1x</button>
+                            <button data-speed="1500" class="speed-btn active px-2 py-1 rounded bg-stadium-700 text-white font-bold">2x</button>
+                            <button data-speed="750" class="speed-btn px-2 py-1 rounded text-slate-400 hover:text-white">3x</button>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Ball Strip Carousel -->
+                    <div class="w-full lg:w-auto overflow-x-auto no-scrollbar flex items-center space-x-1.5 py-1" id="ballPillStrip">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3-Column Core Experience Grid -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+            <!-- LEFT COLUMN: Ball Tactical Decrypter & Pitch Physics (4 Cols) -->
+            <div class="lg:col-span-4 space-y-5">
+                <!-- Tactical Decrypter Card -->
+                <div class="bg-stadium-800 border border-stadium-700 rounded-2xl p-5 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between border-b border-stadium-700/60 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
+                                🧠
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Tactical Decrypter</h3>
+                                <p class="text-[11px] text-slate-400">Why Did That Ball Happen?</p>
+                            </div>
+                        </div>
+                        <span id="ballBadgeType" class="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
+                            WICKET
+                        </span>
+                    </div>
+
+                    <!-- Ball Physics Card -->
+                    <div class="bg-stadium-900/80 rounded-xl p-3.5 border border-stadium-700/60 space-y-2.5">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-400 font-medium">Delivery Speed:</span>
+                            <span class="font-mono text-cyan-400 font-bold" id="physSpeed">123.4 km/h (Off-Cutter)</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-400 font-medium">Pitch Length:</span>
+                            <span class="font-mono text-slate-200" id="physLength">Good Length (6.8m)</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-400 font-medium">Target Line:</span>
+                            <span class="font-mono text-slate-200" id="physLine">6th Stump Channel</span>
+                        </div>
+
+                        <!-- Mini Pitch Graphic Visualizer -->
+                        <div class="pt-2 border-t border-stadium-700/50">
+                            <div class="h-14 w-full bg-emerald-950/40 rounded-lg border border-emerald-800/40 relative overflow-hidden flex items-center justify-center">
+                                <div class="absolute inset-x-8 inset-y-1.5 border border-dashed border-emerald-600/30 rounded"></div>
+                                <div class="absolute h-full w-0.5 bg-emerald-500/20 left-1/2"></div>
+                                <!-- Stumps -->
+                                <div class="absolute right-4 w-1.5 h-6 bg-amber-400/80 rounded-sm"></div>
+                                <!-- Pitch Impact Dot -->
+                                <div id="pitchImpactMarker" class="absolute w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow-lg animate-ping" style="right: 32%; top: 40%;"></div>
+                                <div id="pitchImpactMarkerStatic" class="absolute w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow-lg" style="right: 32%; top: 40%;"></div>
+                                <span class="text-[9px] text-emerald-400/80 font-mono absolute bottom-1 left-2 font-semibold tracking-wider">PITCH IMPACT RADAR</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Tactical Breakdown -->
+                    <div class="space-y-2 text-xs">
+                        <h4 id="tacticalHeadline" class="font-bold text-white text-sm text-indigo-300">The Slower Cutter Trap Outside Off</h4>
+                        <p id="tacticalAnalysis" class="text-slate-300 leading-relaxed">
+                            Klaasen has a 198 strike rate against straight 140km/h pace, but Rohit Sharma instructed Hardik to bowl off-pace wide of off-stump with deep backward point protecting the boundary.
+                        </p>
+                        <div class="bg-indigo-950/30 border border-indigo-800/40 rounded-lg p-2.5 mt-2">
+                            <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">Key Matchup Metric</span>
+                            <p id="tacticalMatchup" class="text-slate-300 text-[11px]">
+                                Klaasen vs Off-Cutters: Strike rate drops from 195 to 112 when pace is dropped below 125 km/h.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Live Commentary -->
+                    <div class="bg-stadium-900/60 rounded-xl p-3 border border-stadium-700/60 text-xs">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Broadcast Call</span>
+                        <p id="ballCommentary" class="text-slate-200 italic font-sans leading-relaxed">
+                            "OUT! CAUGHT BEHIND! The match flips on its head! Hardik Pandya bowls a wide off-cutter, Klaasen reaches out and feathers an edge to Rishabh Pant!"
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Win Probability Line Chart -->
+                <div class="bg-stadium-800 border border-stadium-700 rounded-2xl p-5 shadow-xl space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center">
+                            <i data-lucide="trending-up" class="w-3.5 h-3.5 mr-1.5 text-dream-turf"></i> Win Probability Momentum
+                        </h3>
+                        <span class="text-[10px] text-slate-500">Ball-by-Ball Trend</span>
+                    </div>
+                    <div class="h-44 w-full">
+                        <canvas id="winProbChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTER COLUMN: Catch-Up Engine & Dream11 Fantasy Leverage (4 Cols) -->
+            <div class="lg:col-span-4 space-y-5">
+                <!-- "Catch Me Up in 10s" Card -->
+                <div class="bg-gradient-to-br from-stadium-800 to-stadium-800/90 border border-stadium-700 rounded-2xl p-5 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between border-b border-stadium-700/60 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-lg bg-dream-crimson/20 text-dream-crimson flex items-center justify-center font-bold">
+                                ⚡
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Catch Me Up in 10s</h3>
+                                <p class="text-[11px] text-slate-400">Tuned in late? Instant match context</p>
+                            </div>
+                        </div>
+                        <button id="refreshCatchupBtn" class="text-xs bg-stadium-700 hover:bg-stadium-600 text-slate-300 hover:text-white px-2.5 py-1 rounded-md transition flex items-center space-x-1">
+                            <i data-lucide="sparkles" class="w-3 h-3 text-dream-crimson"></i>
+                            <span>Refresh</span>
+                        </button>
+                    </div>
+
+                    <!-- 3 Digest Cards -->
+                    <div class="space-y-2.5" id="catchupBulletsContainer">
+                        <!-- Bullet 1: Story -->
+                        <div class="bg-stadium-900/80 border border-stadium-700/60 rounded-xl p-3 space-y-1">
+                            <div class="flex items-center space-x-1.5 text-xs font-bold text-blue-400">
+                                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                                <span>The Match Story</span>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed" id="bulletStory">
+                                South Africa were cruising at 151/4, needing 30 off 30 with Klaasen on 52. On 15.1, Hardik Pandya struck gold with an off-cutter to dismiss Klaasen. Over 16 conceded only 4 runs.
+                            </p>
+                        </div>
+
+                        <!-- Bullet 2: Tactical Shift -->
+                        <div class="bg-stadium-900/80 border border-stadium-700/60 rounded-xl p-3 space-y-1">
+                            <div class="flex items-center space-x-1.5 text-xs font-bold text-dream-gold">
+                                <i data-lucide="git-commit" class="w-3.5 h-3.5"></i>
+                                <span>Tactical Pivot</span>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed" id="bulletPivot">
+                                India took pace off the ball. Rohit moved third man inside the ring and cut off Klaasen's arc outside off stump.
+                            </p>
+                        </div>
+
+                        <!-- Bullet 3: Next 12 Balls -->
+                        <div class="bg-stadium-900/80 border border-stadium-700/60 rounded-xl p-3 space-y-1">
+                            <div class="flex items-center space-x-1.5 text-xs font-bold text-emerald-400">
+                                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                                <span>Next 12 Balls Watchlist</span>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed" id="bulletNext">
+                                Jasprit Bumrah has 2 overs in hand. Can Miller survive the 140km/h reverse-swing burst?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dream11 Fantasy Leverage Radar Card -->
+                <div class="bg-stadium-800 border border-stadium-700 rounded-2xl p-5 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between border-b border-stadium-700/60 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-lg bg-dream-red/20 text-dream-red flex items-center justify-center font-bold">
+                                🎯
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Dream11 Leverage Radar</h3>
+                                <p class="text-[11px] text-slate-400">Live Fantasy Point Swings & Multipliers</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] bg-dream-red/20 text-dream-crimson border border-dream-red/30 px-2 py-0.5 rounded-full font-bold uppercase">
+                            2X CAPTAIN ROI
+                        </span>
+                    </div>
+
+                    <!-- Current Ball Fantasy Impact -->
+                    <div class="bg-gradient-to-r from-stadium-900 to-dream-darkred/20 rounded-xl p-3.5 border border-dream-red/30 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-white flex items-center">
+                                <i data-lucide="flame" class="w-3.5 h-3.5 text-dream-crimson mr-1"></i>
+                                <span id="fantasyPlayer">Hardik Pandya</span>
+                            </span>
+                            <span class="text-xs font-mono font-bold text-emerald-400" id="fantasyPointsDelta">+29 pts</span>
+                        </div>
+                        <p class="text-xs text-slate-300" id="fantasyMultiplierText">
+                            Hardik captained by 18.4% of users (2x = +58 pts). Huge rank surge for India-heavy fantasy teams.
+                        </p>
+                    </div>
+
+                    <!-- Real-Time Top Performer Leaderboard -->
+                    <div class="space-y-2">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Live Fantasy MVP Leaderboard</span>
+                        <div class="space-y-1.5" id="fantasyLeaderboardContainer">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Tactical Fantasy Tip -->
+                    <div class="bg-stadium-900/60 rounded-xl p-3 border border-stadium-700/60 text-xs">
+                        <span class="text-[10px] font-bold text-dream-gold uppercase tracking-wider flex items-center mb-1">
+                            <i data-lucide="lightbulb" class="w-3 h-3 mr-1 text-dream-gold"></i> Live Captaincy Strategy
+                        </span>
+                        <p class="text-slate-300 text-[11px]" id="fantasyTipText">
+                            Bowlers who bowl Overs 17 & 19 receive +25 pts per wicket plus dot-ball density bonuses. With RRR above 8.0, batting risk shoots up 3x, making death bowlers the highest-ROI captaincy picks.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: "Ask the Dugout" AI Copilot (4 Cols) -->
+            <div class="lg:col-span-4">
+                <div class="bg-stadium-800 border border-stadium-700 rounded-2xl p-5 shadow-xl flex flex-col h-full min-h-[580px] justify-between">
+                    <div class="space-y-3">
+                        <!-- Dugout Header -->
+                        <div class="flex items-center justify-between border-b border-stadium-700/60 pb-3">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                                    🎙️
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-white flex items-center">
+                                        Ask the Dugout <span class="ml-1 text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-500/30">AI COPILOT</span>
+                                    </h3>
+                                    <p class="text-[11px] text-slate-400">Live Match Tactical & Fantasy Q&A</p>
+                                </div>
+                            </div>
+                            <span id="aiEngineBadge" class="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded font-bold">
+                                ✨ Gemini 3.5 Flash Live
+                            </span>
+                        </div>
+
+                        <!-- Quick Prompt Suggestion Chips -->
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <button class="quick-prompt text-[11px] bg-stadium-700/70 hover:bg-stadium-700 text-slate-300 hover:text-white px-2.5 py-1 rounded-full border border-stadium-600/50 transition">
+                                Why is Bumrah bowling now?
+                            </button>
+                            <button class="quick-prompt text-[11px] bg-stadium-700/70 hover:bg-stadium-700 text-slate-300 hover:text-white px-2.5 py-1 rounded-full border border-stadium-600/50 transition">
+                                What is the win probability?
+                            </button>
+                            <button class="quick-prompt text-[11px] bg-stadium-700/70 hover:bg-stadium-700 text-slate-300 hover:text-white px-2.5 py-1 rounded-full border border-stadium-600/50 transition">
+                                Why did Klaasen get out?
+                            </button>
+                            <button class="quick-prompt text-[11px] bg-stadium-700/70 hover:bg-stadium-700 text-slate-300 hover:text-white px-2.5 py-1 rounded-full border border-stadium-600/50 transition">
+                                Who should be my fantasy VC?
+                            </button>
+                        </div>
+
+                        <!-- Chat Messages Scroll Area -->
+                        <div id="chatHistory" class="space-y-3 overflow-y-auto max-h-[360px] pr-1 pt-2 text-xs">
+                            <!-- Assistant Welcome Message -->
+                            <div class="flex items-start space-x-2">
+                                <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
+                                    AI
+                                </div>
+                                <div class="bg-stadium-900 border border-stadium-700 rounded-xl p-3 text-slate-200 leading-relaxed">
+                                    Welcome to the Dugout! I'm tracking every ball, tactical trap, and Dream11 fantasy point swing live. Ask me anything about matchups, win predictors, or who to captain!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Bar -->
+                    <form id="dugoutChatForm" class="pt-3 border-t border-stadium-700/60 flex items-center space-x-2">
+                        <input type="text" id="dugoutInput" placeholder="Ask about tactics, field traps, captaincy..." class="w-full bg-stadium-900 border border-stadium-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-dream-crimson transition">
+                        <button type="submit" class="bg-gradient-to-r from-dream-red to-dream-crimson hover:brightness-110 text-white p-2.5 rounded-xl shrink-0 transition shadow-lg shadow-dream-red/20">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Modal: Assignment Pitch & Submission Note (<200 words) -->
+    <div id="aboutModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-stadium-800 border border-stadium-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-stadium-700 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🏏</span>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Dream11 Assignment Submission Package</h3>
+                        <p class="text-xs text-slate-400">Forward Deployed Engineer Intern Assignment</p>
+                    </div>
+                </div>
+                <button id="closeAboutModal" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- 200 Word Note -->
+            <div class="bg-stadium-900 rounded-xl p-4 border border-stadium-700 space-y-3 text-xs leading-relaxed">
+                <div class="flex items-center justify-between">
+                    <span class="font-bold text-dream-crimson uppercase tracking-wider text-[11px]">Submission Note (&lt; 200 Words)</span>
+                    <button id="copyNoteBtn" class="bg-stadium-700 hover:bg-stadium-600 text-slate-200 px-2.5 py-1 rounded text-[11px] transition flex items-center space-x-1">
+                        <i data-lucide="copy" class="w-3 h-3"></i>
+                        <span id="copyNoteLabel">Copy Text</span>
+                    </button>
+                </div>
+                <div id="submissionNoteContent" class="text-slate-200 space-y-2 font-sans bg-stadium-800/60 p-3 rounded-lg border border-stadium-700/40">
+                    <p><strong>What fan problem are you solving?</strong><br>
+                    During live cricket matches, fans face context blindness and second-screen fatigue. Broadcast commentary is generic, scorecards only show cold numbers, and fans tuning in late (e.g. over 15) struggle to reconstruct why the momentum swung. Concurrently, millions of Dream11 fantasy players cannot visualize the real-time fantasy point impact or captaincy leverage of micro-events (e.g. death-over dot balls vs boundary traps).</p>
+
+                    <p><strong>How does your solution help?</strong><br>
+                    MatchPulse AI provides a live tactical & fantasy companion with: (1) <em>"Catch Me Up in 10s"</em>, generating an instant 3-bullet narrative on game state, tactical pivots, and what to watch next; (2) <em>Tactical Ball Decrypter</em>, decoding ball physics, seam movement, and batter matchup flaws; (3) <em>Fantasy Leverage Radar</em>, tracking live Dream11 point swings and captaincy multipliers; and (4) <em>Dugout AI Copilot</em> for real-time natural language fan Q&A.</p>
+
+                    <p><strong>Which AI tools did you use?</strong><br>
+                    Google Gemini 1.5 Flash API (with prompt-engineered live match context injection), domain-driven heuristic tactical evaluation engines, dynamic Win Probability regression modeling, and Flask + Tailwind CSS with Web Audio API for interactive broadcast playback.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button id="closeAboutModalBtn2" class="bg-stadium-700 hover:bg-stadium-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Gemini API Key Config -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-stadium-800 border border-stadium-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-stadium-700 pb-3">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="key" class="w-5 h-5 text-emerald-400"></i>
+                    <h3 class="text-base font-bold text-white">Gemini API Key Settings</h3>
+                </div>
+                <button id="closeApiKeyModal" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+                MatchPulse AI features an **Offline Resilient Tactical Engine** that works with zero API keys. To enable live multimodal Google Gemini 1.5 Flash reasoning, you can optionally paste your free Google AI Studio key below.
+            </p>
+
+            <div class="space-y-2">
+                <label for="geminiKeyInput" class="text-xs font-semibold text-slate-300">Google Gemini API Key (Optional):</label>
+                <input type="password" id="geminiKeyInput" placeholder="AIzaSy..." class="w-full bg-stadium-900 border border-stadium-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+                <button id="clearKeyBtn" class="text-xs text-slate-400 hover:text-red-400 transition">
+                    Clear Key (Use Local Engine)
+                </button>
+                <button id="saveKeyBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition">
+                    Save & Activate
+                </button>
+            </div>
+    <!-- Modal: Ingest Any Live Match Ball -->
+    <div id="liveIngestModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-stadium-800 border border-stadium-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-stadium-700 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
+                    <h3 class="text-base font-bold text-white">🔴 Ingest Real-Time Live Ball</h3>
+                </div>
+                <button id="closeLiveIngestModal" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Connect MatchPulse AI to any live international or domestic match! Ingest a live delivery below — the engine automatically computes ball physics, Win Probability deltas, and Dream11 fantasy multipliers in real time.
+            </p>
+
+            <form id="liveIngestForm" class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Match Name</label>
+                        <input type="text" id="ingestTitle" value="IND vs AUS — Live T20" class="w-full bg-stadium-900 border border-stadium-700 rounded-lg p-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Over Number (e.g. 18.2)</label>
+                        <input type="text" id="ingestOver" value="18.2" class="w-full bg-stadium-900 border border-stadium-700 rounded-lg p-2 text-white font-mono">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Bowler Name</label>
+                        <input type="text" id="ingestBowler" value="Jasprit Bumrah" class="w-full bg-stadium-900 border border-stadium-700 rounded-lg p-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Striker Name</label>
+                        <input type="text" id="ingestStriker" value="Glenn Maxwell" class="w-full bg-stadium-900 border border-stadium-700 rounded-lg p-2 text-white">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Ball Outcome</label>
+                        <select id="ingestOutcome" class="w-full bg-stadium-900 border border-stadium-700 rounded-lg p-2 text-white">
+                            <option value="dot">Dot Ball (0 runs)</option>
+                            <option value="single">Single (1 run)</option>
+                            <option value="two">Two (2 runs)</option>
+                            <option value="four">Boundary Four (4 runs)</option>
+                            <option value="six">Sixer (6 runs)</option>
+                            <option value="wicket">WICKET (Out!)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold">Target Score</label>
+                        <input type="number" id="ingestTarget" value="185" class="w-full bg-stadium-900 border border-stadium-700 rounded-lg p-2 text-white font-mono">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1 font-semibold">Ball Commentary / Observation</label>
+                    <input type="text" id="ingestCommentary" value="Searing 143 km/h yorker on middle stump, dug out with difficulty!" class="w-full bg-stadium-900 border border-stadium-700 rounded-lg p-2 text-white">
+                </div>
+
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" id="closeLiveIngestModalBtn2" class="bg-stadium-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-gradient-to-r from-red-600 to-dream-crimson text-white font-bold px-4 py-1.5 rounded-lg shadow-lg shadow-red-600/30 text-xs flex items-center space-x-1">
+                        <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                        <span>Ingest &amp; Analyze Ball</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
