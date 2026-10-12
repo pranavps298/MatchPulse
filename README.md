@@ -1,4 +1,5 @@
 # 🏏 MatchPulse AI — Live Tactical & Fantasy Match Companion
+> **Deployed and accessible via** : https://matchpulse-78o8.onrender.com/ 
 > **Dream11 Forward Deployed Engineer (FDE) Intern Assignment**  
 > *Author:* Pranav P S ([@pranavps298](https://github.com/pranavps298))  
 > *Submission Form:* [Dream11 Assignment Submission](https://forms.gle/s3dxPxAd8Jw7w3an7)
